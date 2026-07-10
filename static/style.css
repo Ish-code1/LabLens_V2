@@ -1,0 +1,471 @@
+/* Palette - Blue Theme */
+:root {
+    --bg: #0c121c;
+    --bg2: #162434;
+    --border: #3c82dc;
+    --border2: #1c416e;
+    --s-block: #50d2ff;
+    --p-block: #78c8ff;
+    --d-block: #64b4ff;
+    --gen-block: #c878ff;
+    --white: #f5fcff;
+    --dim: #6e8ca0;
+    --gold: #3ce6ff;
+    --danger: #3c78f0;
+    --cyan: #64f0ff;
+    --teal: #8cffdc;
+    --reaction: #b4ffc8;
+    --font-family: "Times New Roman", Times, serif;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: var(--font-family);
+    color: var(--white);
+    user-select: none;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#camera-container {
+    position: relative;
+    overflow: hidden;
+    /* width and height are set dynamically by app.js */
+}
+
+#video-feed, #canvas-overlay, #ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#video-feed, #canvas-overlay {
+    transform: scaleX(-1);
+}
+
+#canvas-overlay {
+    z-index: 30;
+    pointer-events: none;
+}
+
+#ui-layer {
+    z-index: 20;
+    pointer-events: none;
+}
+
+/* Re-enable clicks on every interactive element inside ui-layer */
+#ui-layer .panel,
+#ui-layer .icon,
+#ui-layer #lab-guide,
+#ui-layer #lab-guide *,
+#ui-layer #chem-picker *,
+#ui-layer #info-panel,
+#ui-layer #pt-card,
+#ui-layer #pt-card * {
+    pointer-events: all;
+}
+
+/* Base Panel Styles */
+.panel {
+    background-color: var(--bg2);
+    border: 2px solid var(--border);
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.panel-header {
+    background-color: var(--bg);
+    padding: 6px 12px;
+    font-size: 14px;
+    color: var(--dim);
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    justify-content: space-between;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Info Panel */
+#info-panel {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    width: 260px;
+    height: auto;
+    border-radius: 10px;
+    background-color: rgba(12, 18, 28, 0.55);
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+}
+
+#info-panel .panel-header {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    background-color: rgba(12, 18, 28, 0.8);
+    color: var(--white);
+    font-size: 18px;
+}
+
+.info-content {
+    padding: 15px;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+#loaded-chem-name, #beaker-chem-name {
+    color: var(--gold);
+    font-weight: bold;
+}
+
+/* Lab Guide — opens to the right of the guide icon */
+#lab-guide {
+    position: absolute;
+    top: 145px;       /* align with guide icon top */
+    left: 120px;      /* right beside the icon column */
+    right: auto;
+    bottom: auto;
+    width: 380px;
+    background-color: rgba(12, 18, 28, 0.92);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    box-sizing: border-box;
+    max-height: 65vh;
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    backdrop-filter: blur(8px);
+    pointer-events: all;
+}
+
+#guide-block-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border2);
+}
+
+.guide-tab {
+    flex: 1;
+    padding: 7px 0;
+    text-align: center;
+    color: var(--dim);
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+}
+
+.guide-tab.active {
+    color: var(--gold);
+    border-bottom: 2px solid var(--gold);
+}
+
+#guide-rxn-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 8px;
+    pointer-events: all;
+}
+
+.guide-rxn-card {
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    pointer-events: all;
+}
+
+.guide-rxn-card:hover, .guide-rxn-card.hovered {
+    border-color: var(--gold);
+    background: rgba(60,230,255,0.07);
+}
+
+.guide-rxn-card .rxn-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--white);
+}
+
+.guide-rxn-card .rxn-obs-preview {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.guide-rxn-card .rxn-tag-badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    margin-top: 4px;
+    font-weight: bold;
+}
+
+.badge-very-high { background: rgba(255,60,60,0.2); color: #ff5555; border: 1px solid #ff3c3c44; }
+.badge-high      { background: rgba(255,180,60,0.2); color: #ffb43c; border: 1px solid #ffb43c44; }
+.badge-moderate  { background: rgba(255,255,60,0.2); color: #cccc00; border: 1px solid #ffff3c44; }
+
+/* Icons */
+.icon {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    padding: 2px;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    transition: all 0.2s;
+    opacity: 0.65;
+}
+
+.icon.active {
+    border-color: var(--gold);
+    background-color: rgba(60, 230, 255, 0.2);
+    opacity: 1;
+}
+
+#tube-icon {
+    top: 10px;
+    left: 10px;
+    width: 100px;
+    height: 100px;
+}
+
+#guide-icon {
+    top: 150px;       /* farther down from the 68px tube icon */
+    left: 10px;
+    bottom: auto;
+    right: auto;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    z-index: 30;
+}
+
+/* Beaker Zone */
+#beaker-zone {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+#beaker-svg {
+    width: 160px;
+    height: 160px;
+    z-index: 2;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+#beaker-body {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    clip-path: polygon(16.6% 16.6%, 83.3% 16.6%, 75% 83.3%, 25% 83.3%);
+}
+
+#beaker-liquid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    transition: background-color 0.5s;
+}
+
+#beaker-label {
+    position: absolute;
+    bottom: -25px;
+    color: var(--white);
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #000;
+    white-space: nowrap;
+}
+
+#drop-ring {
+    position: absolute;
+    top: -30px;
+    color: var(--gold);
+    border: 2px dashed var(--gold);
+    border-radius: 50%;
+    padding: 10px 20px;
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.5; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1.05); }
+}
+
+/* Chemical Picker */
+#chem-picker {
+    left: 100px;
+    top: 50px;
+    width: 400px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+#block-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border2);
+}
+
+.tab {
+    flex: 1;
+    padding: 8px 0;
+    text-align: center;
+    color: var(--dim);
+    font-size: 14px;
+    border-right: 1px solid var(--border2);
+    border-bottom: 2px solid transparent;
+}
+
+.tab:last-child {
+    border-right: none;
+}
+
+.tab.active {
+    color: var(--gold);
+    border-bottom: 2px solid var(--gold);
+}
+
+#chem-grid {
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 5px;
+    overflow-y: auto;
+}
+
+.chem-pill {
+    padding: 5px 10px;
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    color: var(--white);
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.chem-pill.hovered {
+    border-color: var(--gold);
+    background-color: var(--border2);
+    transform: scale(1.1);
+}
+
+/* Periodic Table */
+#pt-mode {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(12, 18, 28, 0.9);
+}
+
+#pt-grid {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 70%;
+}
+
+.pt-cell {
+    position: absolute;
+    width: 5.3%;
+    height: 12%;
+    border: 2px solid #fff;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    transition: transform 0.2s;
+}
+
+.pt-cell .atomic-num {
+    font-size: 10px;
+    align-self: flex-start;
+    margin-left: 2px;
+    color: var(--dim);
+}
+
+.pt-cell.hovered {
+    transform: scale(1.3);
+    z-index: 100;
+    background-color: var(--bg2);
+}
+
+#pt-card {
+    top: 20%;
+    left: 30%;
+    width: 40%;
+    background-color: rgba(22, 36, 52, 0.95);
+    font-size: 18px;
+}
+
+#mode-hint {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0,0,0,0.7);
+    padding: 5px 15px;
+    border-radius: 15px;
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-size: 14px;
+}
+
+/* Exam Tags */
+.tag-very-high { color: #ff3c3c; }
+.tag-high { color: #ffb43c; }
+.tag-moderate { color: #ffff3c; }
+
+#rxn-tag-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+#rxn-tag-dot.tag-very-high { background-color: #ff3c3c; box-shadow: 0 0 5px #ff3c3c; }
+#rxn-tag-dot.tag-high { background-color: #ffb43c; box-shadow: 0 0 5px #ffb43c; }
+#rxn-tag-dot.tag-moderate { background-color: #ffff3c; box-shadow: 0 0 5px #ffff3c; }

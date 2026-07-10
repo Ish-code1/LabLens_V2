@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabLens Web</title>
+    <link rel="stylesheet" href="style.css?v=12">
+    
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="camera-container">
+            <!-- The video is drawn natively -->
+            <video id="video-feed" autoplay playsinline></video>
+            <canvas id="canvas-overlay"></canvas>
+            
+            <!-- UI Container -->
+            <div id="ui-layer">
+                <!-- Mode Hint -->
+                <div id="mode-hint">Hold Open Palm (still) = PT Mode  |  Wave = Unload  |  Fist = Scroll  |  Pinch = Select</div>
+                
+                <!-- Camera Status -->
+                <div id="cam-status" style="
+                    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+                    background:rgba(0,0,0,0.85); border:2px solid #3c82dc;
+                    border-radius:12px; padding:20px 32px; font-size:18px;
+                    color:#fff; text-align:center; z-index:999;
+                ">⏳ Starting camera...</div>
+                
+                <!-- Top Left Reagent Icon (Molecule) -->
+                <img src="molecule.png" id="tube-icon" alt="Reagents" class="icon">
+                
+                <!-- Lab Guide Icon -->
+                <img src="guide.png" id="guide-icon" alt="Lab Guide" class="icon">
+                
+                <!-- Beaker Zone -->
+                <div id="beaker-zone">
+                    <!-- Drop here ring -->
+                    <div id="drop-ring" class="hidden">DROP HERE</div>
+                    
+                    <div id="beaker-body">
+                        <div id="beaker-liquid" class="hidden"></div>
+                    </div>
+                    <svg id="beaker-svg" width="120" height="120" viewBox="0 0 120 120">
+                        <polygon points="20,20 30,100 90,100 100,20" fill="none" stroke="#dc823c" stroke-width="4" stroke-linejoin="round"/>
+                        <line x1="15" y1="20" x2="105" y2="20" stroke="#dc823c" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="15" y1="20" x2="18" y2="14" stroke="#dc823c" stroke-width="4" stroke-linecap="round"/>
+                        <line x1="84" y1="80" x2="94" y2="80" stroke="#dc823c" stroke-width="2"/>
+                        <line x1="86" y1="60" x2="96" y2="60" stroke="#dc823c" stroke-width="2"/>
+                        <line x1="88" y1="40" x2="98" y2="40" stroke="#dc823c" stroke-width="2"/>
+                    </svg>
+                    <div id="beaker-label"></div>
+                </div>
+                
+                <!-- Chemical Picker -->
+                <div id="chem-picker" class="panel hidden">
+                    <div class="panel-header">Chemicals</div>
+                    <div id="block-tabs"></div>
+                    <div id="chem-grid"></div>
+                </div>
+                
+                <!-- Info Panel -->
+                <div id="info-panel">
+                    <div class="panel-header">Information</div>
+                    
+                    <div id="info-idle" class="info-content">
+                        [No subject selected]
+                    </div>
+                    
+                    <div id="info-loaded" class="info-content hidden">
+                        [Loaded] <span id="loaded-chem-name"></span>
+                    </div>
+                    
+                    <div id="info-beaker" class="info-content hidden">
+                        [Beaker] <span id="beaker-chem-name"></span>
+                    </div>
+                    
+                    <div id="info-reaction" class="info-content hidden">
+                        <div style="font-size:18px; margin-bottom:8px" id="rxn-eq"></div>
+                        <div id="cond-wrapper" style="color:var(--gold); margin-bottom:8px">
+                            Conditions: <span id="rxn-cond"></span>
+                        </div>
+                        <div style="color:var(--reaction); margin-bottom:8px">
+                            Observation: <span id="rxn-obs"></span>
+                        </div>
+                        
+                        <div style="margin-top: 15px;">
+                            <span id="rxn-tag-dot"></span>
+                            <span id="rxn-tag-lbl"></span>
+                        </div>
+                        <div style="color:var(--dim); margin-top:5px">
+                            Block: <span id="rxn-block"></span>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Lab Guide Panel — mirrors chemicals picker -->
+                <div id="lab-guide" class="panel hidden">
+                    <div class="panel-header">📋 Lab Guide — Reactions
+                        <span style="color:var(--dim);font-size:11px;font-weight:normal;">Fist ↑↓ = scroll</span>
+                    </div>
+                    <div id="guide-block-tabs">
+                        <div class="guide-tab active" data-block="s_block">S-Block</div>
+                        <div class="guide-tab" data-block="p_block">P-Block</div>
+                        <div class="guide-tab" data-block="d_block">D-Block</div>
+                        <div class="guide-tab" data-block="general">General</div>
+                    </div>
+                    <div id="guide-rxn-list"></div>
+                </div>
+                
+                <!-- Periodic Table Mode -->
+                <div id="pt-mode" class="hidden">
+                    <div id="pt-grid"></div>
+                    
+                    <div id="pt-card" class="panel hidden">
+                        <div class="panel-header">Element Card</div>
+                        <div style="padding: 15px;">
+                            <div id="pt-card-symbol" style="font-size: 32px; font-weight: bold; text-align: center;"></div>
+                            <div id="pt-card-name" style="text-align: center; color: var(--gold); margin-bottom: 10px;"></div>
+                            <div>Z: <span id="pt-card-atomic"></span></div>
+                            <div>State: <span id="pt-card-state"></span></div>
+                            <div>Color: <span id="pt-card-color"></span></div>
+                            <div>Config: <span id="pt-card-config"></span></div>
+                            <div id="pt-card-block" style="color: var(--dim); margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js?v=41"></script>
+</body>
+</html>
