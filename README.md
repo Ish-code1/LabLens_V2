@@ -1,7 +1,7 @@
 # LabLens
 
-A gesture-controlled chemistry lab built with OpenCV and MediaPipe. LabLens allows students to "load" virtual chemicals onto their fingertip using hand tracking and drop them into a virtual beaker to trigger realistic, animated chemical reactions. It also includes a secondary simplified Periodic Table mode.
-
+A gesture-controlled chemistry lab built with OpenCV and MediaPipe. LabLens allows students to "load" virtual chemicals onto their fingertip using hand tracking and drop them into a virtual beaker to trigger realistic, animated chemical reactions. It also includes a secondary simplified Periodic Table mode.<br>
+[Demo Link](https://lab-lens-v2.vercel.app/)
 ## Setup
 
 1. Clone the repository
